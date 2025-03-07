@@ -1,0 +1,35 @@
+﻿@model IEnumerable<RezervacijeMVC.Models.Tool>
+
+@{
+    ViewData["Title"] = "Tools";
+}
+
+<h1>Tools</h1>
+
+<p>
+    <a href="@Url.Action("Create")">Create New Tool</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tool Type</th>
+            <th>Price Rent Per Day</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ToolType</td>
+                <td>@item.PriceRentPerDay</td>
+                <td>
+                    <a href="@Url.Action("Details", new { id = item.ID })">Details</a> |
+                    <a href="@Url.Action("Edit", new { id = item.ID })">Edit</a> |
+                    <a href="@Url.Action("Delete", new { id = item.ID })">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

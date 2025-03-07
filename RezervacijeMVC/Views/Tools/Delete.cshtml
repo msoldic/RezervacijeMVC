@@ -1,0 +1,15 @@
+﻿@model RezervacijeMVC.Models.Tool
+
+@{
+    ViewData["Title"] = "Delete Tool";
+}
+
+<h1>Delete Tool</h1>
+
+<h3>Are you sure you want to delete this tool?</h3>
+<p>@Model.ToolType</p>
+
+<form method="post">
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+</form>

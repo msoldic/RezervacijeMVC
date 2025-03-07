@@ -1,0 +1,36 @@
+﻿@model RezervacijeMVC.Models.ToolReservation
+
+@{
+    ViewData["Title"] = "Create Tool Reservation";
+}
+
+<h1>Create Tool Reservation</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="ClientFirstName">First Name</label>
+        <input type="text" class="form-control" id="ClientFirstName" name="ClientFirstName" />
+    </div>
+    <div class="form-group">
+        <label for="ClientSecondName">Last Name</label>
+        <input type="text" class="form-control" id="ClientSecondName" name="ClientSecondName" />
+    </div>
+    <div class="form-group">
+        <label for="ToolID">Tool</label>
+        <select id="ToolID" name="ToolID" class="form-control">
+            @foreach (var tool in ViewData["Tools"] as List<RezervacijeMVC.Models.Tool>)
+            {
+                <option value="@tool.ID">@tool.ToolType</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="DateReservationFrom">Reservation Start Date</label>
+        <input type="date" class="form-control" id="DateReservationFrom" name="DateReservationFrom" />
+    </div>
+    <div class="form-group">
+        <label for="DateReservationTo">Reservation End Date</label>
+        <input type="date" class="form-control" id="DateReservationTo" name="DateReservationTo" />
+    </div>
+    <button type="submit" class="btn btn-primary">Create Reservation</button>
+</form>

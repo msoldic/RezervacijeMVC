@@ -1,0 +1,19 @@
+﻿@model RezervacijeMVC.Models.Tool
+
+@{
+    ViewData["Title"] = "Create Tool";
+}
+
+<h1>Create Tool</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="ToolType">Tool Type</label>
+        <input type="text" class="form-control" id="ToolType" name="ToolType" />
+    </div>
+    <div class="form-group">
+        <label for="PriceRentPerDay">Price Rent Per Day</label>
+        <input type="number" class="form-control" id="PriceRentPerDay" name="PriceRentPerDay" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

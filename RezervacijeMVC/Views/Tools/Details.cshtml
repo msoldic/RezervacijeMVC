@@ -1,0 +1,12 @@
+﻿@model RezervacijeMVC.Models.Tool
+
+@{
+    ViewData["Title"] = "Tool Details";
+}
+
+<h1>@Model.ToolType</h1>
+
+<p>Price Rent Per Day: @Model.PriceRentPerDay</p>
+
+<a href="@Url.Action("Edit", new { id = Model.ID })">Edit</a> |
+<a href="@Url.Action("Delete", new { id = Model.ID })">Delete</a>
