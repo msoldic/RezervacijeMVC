@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RezervacijeMVC.Models.ToolReservation>
+﻿@model PaginatedViewModel<ToolReservation>
 
 @{
     ViewData["Title"] = "Tool Reservations";
@@ -7,7 +7,7 @@
 <h1>Tool Reservations</h1>
 
 <p>
-    <a href="@Url.Action("Create")">Create New Reservation</a>
+    <button class="btn btn-primary" id="createReservationBtn">Create New Reservation</button>
 </p>
 
 <table class="table">
@@ -21,7 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td>@item.ClientFirstName @item.ClientSecondName</td>
@@ -29,11 +29,104 @@
                 <td>@item.DateReservationFrom - @item.DateReservationTo</td>
                 <td>@item.TotalRentPrice</td>
                 <td>
-                    <a href="@Url.Action("Details", new { id = item.ID })">Details</a> |
-                    <a href="@Url.Action("Edit", new { id = item.ID })">Edit</a> |
-                    <a href="@Url.Action("Delete", new { id = item.ID })">Delete</a>
+                    <button class="btn btn-info editReservationBtn" data-id="@item.ID" data-clientfirstname="@item.ClientFirstName" data-clientsecondname="@item.ClientSecondName" data-datereservationfrom="@item.DateReservationFrom.ToString("yyyy-MM-dd")" data-datereservationto="@item.DateReservationTo.ToString("yyyy-MM-dd")" data-toolid="@item.ToolID">Edit</button>
+                    <button class="btn btn-danger" onclick="deleteReservation(@item.ID)">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<!-- Pagination Controls -->
+<div>
+    <ul class="pagination">
+        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="@Url.Action("Index", "ToolReservations", new { pageNumber = Model.CurrentPage - 1, pageSize = Model.PageSize })">Previous</a>
+        </li>
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" href="@Url.Action("Index", "ToolReservations", new { pageNumber = i, pageSize = Model.PageSize })">@i</a>
+            </li>
+        }
+        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+            <a class="page-link" href="@Url.Action("Index", "ToolReservations", new { pageNumber = Model.CurrentPage + 1, pageSize = Model.PageSize })">Next</a>
+        </li>
+    </ul>
+</div>
+
+<!-- Modal for Create/Edit Tool Reservation -->
+<div class="modal fade" id="toolReservationModal" tabindex="-1" role="dialog" aria-labelledby="toolReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="toolReservationModalLabel">Create Tool Reservation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="toolReservationForm">
+                    <div class="form-group">
+                        <label for="ClientFirstName">Client First Name</label>
+                        <input type="text" class="form-control" id="ClientFirstName" name="ClientFirstName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="ClientSecondName">Client Last Name</label>
+                        <input type="text" class="form-control" id="ClientSecondName" name="ClientSecondName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="ToolID">Tool</label>
+                        <select id="ToolID" name="ToolID" class="form-control" required>
+                            <!-- Tools will be loaded here via AJAX -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="DateReservationFrom">Reservation Start Date</label>
+                        <input type="date" class="form-control" id="DateReservationFrom" name="DateReservationFrom" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="DateReservationTo">Reservation End Date</label>
+                        <input type="date" class="form-control" id="DateReservationTo" name="DateReservationTo" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#createReservationBtn').on('click', function () {
+                $('#toolReservationModal').modal('show');
+                loadToolsDropdown(1);
+            });
+
+            $('#toolReservationForm').on('submit', function (e) {
+                e.preventDefault();
+                // Form submission logic here
+                $.post('/ToolReservations/Create', $(this).serialize(), function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();  // Reload to show the new reservation
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+        });
+
+        function loadToolsDropdown(pageNumber) {
+            $.get('/ToolReservations/GetToolsForDropdown', { pageNumber: pageNumber, pageSize: 10 }, function (tools) {
+                var $toolSelect = $('#ToolID');
+                $toolSelect.empty();
+                tools.forEach(function (tool) {
+                    $toolSelect.append(new Option(tool.ToolType, tool.ID));
+                });
+            });
+        }
+    </script>
+}

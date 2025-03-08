@@ -14,12 +14,50 @@ namespace RezervacijeMVC.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Index()
+        // GET: ToolReservations
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
-            var toolReservations = await _context.ToolReservations.Include(tr => tr.Tool).ToListAsync();
-            return View(toolReservations);
-        }
+            var toolReservations = _context.ToolReservations.Include(tr => tr.Tool).AsQueryable();
 
+            // Calculate total reservations and total pages
+            var totalReservations = await toolReservations.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalReservations / (double)pageSize);
+
+            // Get paginated tool reservations
+            var paginatedReservations = await toolReservations
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Prepare the paginated view model
+            var model = new PaginatedViewModel<ToolReservation>
+            {
+                Items = paginatedReservations,
+                CurrentPage = pageNumber,
+                TotalPages = totalPages,
+                PageSize = pageSize
+            };
+
+            return View(model);
+        }
+        // For fetching tools for the dropdown with pagination
+        public async Task<IEnumerable<Tool>> GetToolsForDropdown(int pageNumber, int pageSize)
+        {
+            var tools = await _context.Tools
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return tools;
+        }
+        // GET: ToolReservations/Create
+        public async Task<IActionResult> Create()
+        {
+            // Fetch tools with pagination (default: 1 page, 10 tools per page)
+            var tools = await GetToolsForDropdown(1, 10);
+            ViewData["Tools"] = new SelectList(tools, "ID", "ToolType");
+            return PartialView("_ToolReservationModal");
+        }
         // GET: ToolReservations/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -33,11 +71,11 @@ namespace RezervacijeMVC.Controllers
         }
 
         // GET: ToolReservations/Create
-        public IActionResult Create()
+        /*public IActionResult Create()
         {
             ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType");
             return View();
-        }
+        }*/
 
         // POST: ToolReservations/Create
         [HttpPost]

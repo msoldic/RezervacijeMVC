@@ -19,11 +19,28 @@ namespace RezervacijeMVC.Controllers
             _context = context;
         }
 
-        // GET: Tools
-        public async Task<IActionResult> Index()
+        // GET: Tools (with pagination for tools)
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
-            var tools = await _context.Tools.ToListAsync();
-            return View(tools);
+            var tools = _context.Tools.AsQueryable();
+
+            var totalTools = await tools.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalTools / (double)pageSize);
+
+            var paginatedTools = await tools
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var model = new PaginatedViewModel<Tool>
+            {
+                Items = paginatedTools,
+                CurrentPage = pageNumber,
+                TotalPages = totalPages,
+                PageSize = pageSize
+            };
+
+            return View(model);
         }
         // GET: Tools/Details/5
         public async Task<IActionResult> Details(int id)
