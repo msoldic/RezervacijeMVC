@@ -1,22 +1,22 @@
 ﻿@model PaginatedViewModel<ToolReservation>
 
 @{
-    ViewData["Title"] = "Tool Reservations";
+    ViewData["Title"] = "Tool reservations";
 }
 
-<h1>Tool Reservations</h1>
+<h1>Tool reservations</h1>
 
 <p>
-    <button class="btn btn-primary" id="createReservationBtn">Create New Reservation</button>
+    <button class="btn btn-primary" id="createReservationBtn">Create new reservation</button>
 </p>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Client Name</th>
+            <th>Client name</th>
             <th>Tool</th>
-            <th>Reservation Dates</th>
-            <th>Total Rent Price</th>
+            <th>Reservation dates</th>
+            <th>Total rent price</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -29,7 +29,16 @@
                 <td>@item.DateReservationFrom - @item.DateReservationTo</td>
                 <td>@item.TotalRentPrice</td>
                 <td>
-                    <button class="btn btn-info editReservationBtn" data-id="@item.ID" data-clientfirstname="@item.ClientFirstName" data-clientsecondname="@item.ClientSecondName" data-datereservationfrom="@item.DateReservationFrom.ToString("yyyy-MM-dd")" data-datereservationto="@item.DateReservationTo.ToString("yyyy-MM-dd")" data-toolid="@item.ToolID">Edit</button>
+                    <!-- Edit  -->
+                    <button class="btn btn-info editReservationBtn"
+                            data-id="@item.ID"
+                            data-clientfirstname="@item.ClientFirstName"
+                            data-clientsecondname="@item.ClientSecondName"
+                            data-datereservationfrom="@item.DateReservationFrom.ToString("yyyy-MM-dd")"
+                            data-datereservationto="@item.DateReservationTo.ToString("yyyy-MM-dd")"
+                            data-toolid="@item.ToolID">
+                        Edit
+                    </button>
                     <button class="btn btn-danger" onclick="deleteReservation(@item.ID)">Delete</button>
                 </td>
             </tr>
@@ -37,7 +46,7 @@
     </tbody>
 </table>
 
-<!-- Pagination Controls -->
+<!-- Pagination -->
 <div>
     <ul class="pagination">
         <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
@@ -55,38 +64,37 @@
     </ul>
 </div>
 
-<!-- Modal for Create/Edit Tool Reservation -->
+<!-- Popup  -->
 <div class="modal fade" id="toolReservationModal" tabindex="-1" role="dialog" aria-labelledby="toolReservationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="toolReservationModalLabel">Create Tool Reservation</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title" id="toolReservationModalLabel">Create tool reservation</h5>
             </div>
             <div class="modal-body">
                 <form id="toolReservationForm">
+                    <input type="hidden" id="ReservationID" name="ID" /> 
+
                     <div class="form-group">
-                        <label for="ClientFirstName">Client First Name</label>
+                        <label for="ClientFirstName">Client first name</label>
                         <input type="text" class="form-control" id="ClientFirstName" name="ClientFirstName" required />
                     </div>
                     <div class="form-group">
-                        <label for="ClientSecondName">Client Last Name</label>
+                        <label for="ClientSecondName">Client last name</label>
                         <input type="text" class="form-control" id="ClientSecondName" name="ClientSecondName" required />
                     </div>
                     <div class="form-group">
                         <label for="ToolID">Tool</label>
                         <select id="ToolID" name="ToolID" class="form-control" required>
-                            <!-- Tools will be loaded here via AJAX -->
+                          
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="DateReservationFrom">Reservation Start Date</label>
+                        <label for="DateReservationFrom">Reservation start date</label>
                         <input type="date" class="form-control" id="DateReservationFrom" name="DateReservationFrom" required />
                     </div>
                     <div class="form-group">
-                        <label for="DateReservationTo">Reservation End Date</label>
+                        <label for="DateReservationTo">Reservation end date</label>
                         <input type="date" class="form-control" id="DateReservationTo" name="DateReservationTo" required />
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -98,35 +106,71 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function () {
+            // Open popup
             $('#createReservationBtn').on('click', function () {
                 $('#toolReservationModal').modal('show');
                 loadToolsDropdown(1);
             });
 
+            // Edit button
+            $('.editReservationBtn').on('click', function () {
+                var id = $(this).data('id');
+                var clientFirstName = $(this).data('clientfirstname');
+                var clientSecondName = $(this).data('clientsecondname');
+                var dateFrom = $(this).data('datereservationfrom');
+                var dateTo = $(this).data('datereservationto');
+                var toolID = $(this).data('toolid');
+                
+                $('#ReservationID').val(id);
+                $('#ClientFirstName').val(clientFirstName);
+                $('#ClientSecondName').val(clientSecondName);
+                $('#DateReservationFrom').val(dateFrom);
+                $('#DateReservationTo').val(dateTo);
+                $('#ToolID').val(toolID);
+
+                // popup show
+                $('#toolReservationModal').modal('show');
+                loadToolsDropdown(1);  
+            });
+
+            // Form submit 
             $('#toolReservationForm').on('submit', function (e) {
                 e.preventDefault();
-                // Form submission logic here
-                $.post('/ToolReservations/Create', $(this).serialize(), function (response) {
-                    if (response.success) {
-                        alert(response.message);
-                        location.reload();  // Reload to show the new reservation
-                    } else {
-                        alert(response.message);
+
+                var formData = $(this).serialize();
+                var formAction = ($('#ReservationID').val() == '') ? '/ToolReservations/Create' : '/ToolReservations/Edit'; 
+
+                $.ajax({
+                    type: 'POST',
+                    url: formAction,
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();  
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (response) {
+                        alert('Error while saving occured !');
                     }
                 });
             });
-        });
 
-        function loadToolsDropdown(pageNumber) {
-            $.get('/ToolReservations/GetToolsForDropdown', { pageNumber: pageNumber, pageSize: 10 }, function (tools) {
-                var $toolSelect = $('#ToolID');
-                $toolSelect.empty();
-                tools.forEach(function (tool) {
-                    $toolSelect.append(new Option(tool.ToolType, tool.ID));
+            // pagination
+            function loadToolsDropdown(pageNumber) {
+                $.get('/ToolReservations/GetToolsForDropdown', { pageNumber: pageNumber, pageSize: 10 }, function (tools) {
+                    var $toolSelect = $('#ToolID');
+                    $toolSelect.empty();
+                    tools.forEach(function (tool) {
+                        $toolSelect.append(new Option(tool.ToolType, tool.ID));
+                    });
                 });
-            });
-        }
+            }
+        });
     </script>
 }

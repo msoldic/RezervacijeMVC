@@ -18,18 +18,15 @@ namespace RezervacijeMVC.Controllers
         public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
             var toolReservations = _context.ToolReservations.Include(tr => tr.Tool).AsQueryable();
-
-            // Calculate total reservations and total pages
+         
             var totalReservations = await toolReservations.CountAsync();
             var totalPages = (int)Math.Ceiling(totalReservations / (double)pageSize);
-
-            // Get paginated tool reservations
+   
             var paginatedReservations = await toolReservations
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-
-            // Prepare the paginated view model
+  
             var model = new PaginatedViewModel<ToolReservation>
             {
                 Items = paginatedReservations,
@@ -40,7 +37,7 @@ namespace RezervacijeMVC.Controllers
 
             return View(model);
         }
-        // For fetching tools for the dropdown with pagination
+        // drop down
         public async Task<IEnumerable<Tool>> GetToolsForDropdown(int pageNumber, int pageSize)
         {
             var tools = await _context.Tools
@@ -52,13 +49,12 @@ namespace RezervacijeMVC.Controllers
         }
         // GET: ToolReservations/Create
         public async Task<IActionResult> Create()
-        {
-            // Fetch tools with pagination (default: 1 page, 10 tools per page)
+        {            
             var tools = await GetToolsForDropdown(1, 10);
             ViewData["Tools"] = new SelectList(tools, "ID", "ToolType");
             return PartialView("_ToolReservationModal");
         }
-        // GET: ToolReservations/Details/5
+        // GET: ToolReservations/Details/1
         public async Task<IActionResult> Details(int id)
         {
             var reservation = await _context.ToolReservations.Include(tr => tr.Tool)
@@ -70,7 +66,6 @@ namespace RezervacijeMVC.Controllers
             return View(reservation);
         }
 
-        // GET: ToolReservations/Create
         /*public IActionResult Create()
         {
             ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType");
@@ -101,7 +96,7 @@ namespace RezervacijeMVC.Controllers
             return View(reservation);
         }
 
-        // GET: ToolReservations/Edit/5
+        // GET: ToolReservations/Edit/1
         public async Task<IActionResult> Edit(int id)
         {
             var reservation = await _context.ToolReservations.FindAsync(id);
@@ -109,11 +104,12 @@ namespace RezervacijeMVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType", reservation.ToolID);
-            return View(reservation);
+            //ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType", reservation.ToolID);
+            //return View(reservation);
+            return PartialView("_ToolReservationModal", reservation);
         }
 
-        // POST: ToolReservations/Edit/5
+        // POST: ToolReservations/Edit/1
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,ClientFirstName,ClientSecondName,DateReservationFrom,DateReservationTo,ToolID,TotalRentPrice")] ToolReservation reservation)
@@ -131,32 +127,16 @@ namespace RezervacijeMVC.Controllers
 
             var days = (reservation.DateReservationTo - reservation.DateReservationFrom).Days;
             reservation.TotalRentPrice = days * tool.PriceRentPerDay;
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(reservation);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ToolReservationExists(reservation.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(reservation);
+                await _context.SaveChangesAsync();
             }
             ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType", reservation.ToolID);
             return View(reservation);
         }
 
-        // GET: ToolReservations/Delete/5
+        // GET: ToolReservations/Delete/1
         public async Task<IActionResult> Delete(int id)
         {
             var reservation = await _context.ToolReservations.Include(tr => tr.Tool)
@@ -168,7 +148,7 @@ namespace RezervacijeMVC.Controllers
             return View(reservation);
         }
 
-        // POST: ToolReservations/Delete/5
+        // POST: ToolReservations/Delete/1
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

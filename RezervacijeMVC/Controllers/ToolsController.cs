@@ -10,16 +10,12 @@ namespace RezervacijeMVC.Controllers
     public class ToolsController : Controller
     {
         private readonly ToolReservationContext _context;
-        /*public IActionResult Index()
-        {
-            return View();
-        }*/
         public ToolsController(ToolReservationContext context)
         {
             _context = context;
         }
 
-        // GET: Tools (with pagination for tools)
+        // GET: Tools 
         public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
             var tools = _context.Tools.AsQueryable();
@@ -42,7 +38,7 @@ namespace RezervacijeMVC.Controllers
 
             return View(model);
         }
-        // GET: Tools/Details/5
+        // GET: Tools/Details/1
         public async Task<IActionResult> Details(int id)
         {
             var tool = await _context.Tools.FindAsync(id);
@@ -60,7 +56,7 @@ namespace RezervacijeMVC.Controllers
         }
 
         // POST: Tools/Create
-        [HttpPost]
+/*        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ToolType,PriceRentPerDay")] Tool tool)
         {
@@ -72,7 +68,7 @@ namespace RezervacijeMVC.Controllers
             }
             return View(tool);
         }
-        // GET: Tools/Edit/5
+        // GET: Tools/Edit/1
         public async Task<IActionResult> Edit(int id)
         {
             var tool = await _context.Tools.FindAsync(id);
@@ -83,7 +79,7 @@ namespace RezervacijeMVC.Controllers
             return View(tool);
         }
 
-        // POST: Tools/Edit/5
+        // POST: Tools/Edit/1
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,ToolType,PriceRentPerDay")] Tool tool)
@@ -116,7 +112,7 @@ namespace RezervacijeMVC.Controllers
             return View(tool);
         }
 
-        // GET: Tools/Delete/5
+        // GET: Tools/Delete/1
         public async Task<IActionResult> Delete(int id)
         {
             var tool = await _context.Tools.FindAsync(id);
@@ -127,7 +123,7 @@ namespace RezervacijeMVC.Controllers
             return View(tool);
         }
 
-        // POST: Tools/Delete/5
+        // POST: Tools/Delete/1
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -141,7 +137,7 @@ namespace RezervacijeMVC.Controllers
         private bool ToolExists(int id)
         {
             return _context.Tools.Any(e => e.ID == id);
-        }
+        } */
     }
 }
 
