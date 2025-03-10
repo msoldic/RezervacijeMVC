@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].[Tool](
+CREATE TABLE [dbo].[Tools](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[ToolType] [nchar](20) NOT NULL,
 	[PriceRentPerDay] [int] NOT NULL,
@@ -9,12 +9,12 @@ CREATE TABLE [dbo].[Tool](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[Tool] ADD  CONSTRAINT [DF_Tool_PriceRentPerDay]  DEFAULT ((0)) FOR [PriceRentPerDay]
+ALTER TABLE [dbo].[Tools] ADD  CONSTRAINT [DF_Tool_PriceRentPerDay]  DEFAULT ((0)) FOR [PriceRentPerDay]
 GO
 
 --------------------------------
 
-CREATE TABLE [dbo].[ToolReservation](
+CREATE TABLE [dbo].[ToolReservations](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[ClientFirstName] [nchar](20) NOT NULL,
 	[ClientSecondName] [nchar](20) NOT NULL,
@@ -30,9 +30,9 @@ CREATE TABLE [dbo].[ToolReservation](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[ToolReservation]  WITH CHECK ADD  CONSTRAINT [FK_ToolReservation_Tool] FOREIGN KEY([ToolID])
-REFERENCES [dbo].[Tool] ([ID])
+ALTER TABLE [dbo].[ToolReservations]  WITH CHECK ADD  CONSTRAINT [FK_ToolReservation_Tool] FOREIGN KEY([ToolID])
+REFERENCES [dbo].[Tools] ([ID])
 GO
 
-ALTER TABLE [dbo].[ToolReservation] CHECK CONSTRAINT [FK_ToolReservation_Tool]
+ALTER TABLE [dbo].[ToolReservations] CHECK CONSTRAINT [FK_ToolReservation_Tool]
 GO
