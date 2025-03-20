@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RezervacijeMVC.Models;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace RezervacijeMVC.Controllers
@@ -74,7 +75,7 @@ namespace RezervacijeMVC.Controllers
 
         // POST: ToolReservations/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClientFirstName,ClientSecondName,DateReservationFrom,DateReservationTo,ToolID")] ToolReservation reservation)
         {
             if (ModelState.IsValid)
@@ -90,7 +91,7 @@ namespace RezervacijeMVC.Controllers
 
                 _context.Add(reservation);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Ok(HttpStatusCode.OK); //RedirectToAction(nameof(Index));
             }
             ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType", reservation.ToolID);
             return View(reservation);
@@ -111,12 +112,12 @@ namespace RezervacijeMVC.Controllers
 
         // POST: ToolReservations/Edit/1
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,ClientFirstName,ClientSecondName,DateReservationFrom,DateReservationTo,ToolID,TotalRentPrice")] ToolReservation reservation)
         {
             if (id != reservation.ID)
             {
-                return BadRequest();
+                return BadRequest(id.ToString() + " " + reservation.ID.ToString());
             }
 
             var tool = await _context.Tools.FindAsync(reservation.ToolID);
@@ -133,24 +134,12 @@ namespace RezervacijeMVC.Controllers
                 await _context.SaveChangesAsync();
             }
             ViewData["ToolID"] = new SelectList(_context.Tools, "ID", "ToolType", reservation.ToolID);
-            return View(reservation);
+            return Ok(HttpStatusCode.OK);//View(reservation);
         }
 
-        // GET: ToolReservations/Delete/1
-        public async Task<IActionResult> Delete(int id)
-        {
-            var reservation = await _context.ToolReservations.Include(tr => tr.Tool)
-                                                              .FirstOrDefaultAsync(tr => tr.ID == id);
-            if (reservation == null)
-            {
-                return NotFound();
-            }
-            return View(reservation);
-        }
-
-        // POST: ToolReservations/Delete/1
+        // POST: ToolReservations/Delete
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var reservation = await _context.ToolReservations.FindAsync(id);
@@ -162,6 +151,20 @@ namespace RezervacijeMVC.Controllers
         private bool ToolReservationExists(int id)
         {
             return _context.ToolReservations.Any(e => e.ID == id);
+        }
+
+        // GET: ToolReservations/Delete/1
+        [HttpPost, ActionName("DeleteF")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var reservation = await _context.ToolReservations.Include(tr => tr.Tool)
+                                                              .FirstOrDefaultAsync(tr => tr.ID == id);
+            if (reservation == null)
+            {
+                return NotFound(id.ToString());
+            }
+   
+            return Ok(HttpStatusCode.OK);//View(reservation);
         }
     }
 }

@@ -39,7 +39,7 @@
                             data-toolid="@item.ToolID">
                         Edit
                     </button>
-                    <button class="btn btn-danger" onclick="deleteReservation(@item.ID)">Delete</button>
+                    <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="@item.ID"> Delete </button>
                 </td>
             </tr>
         }
@@ -106,15 +106,18 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script>
         $(document).ready(function () {
             // Open popup
             $('#createReservationBtn').on('click', function () {
                 $('#toolReservationModal').modal('show');
+                clearForm();
                 loadToolsDropdown(1);
             });
-
+            function clearForm() {
+                $('#toolReservationForm')[0].reset(); 
+            }
             // Edit button
             $('.editReservationBtn').on('click', function () {
                 var id = $(this).data('id');
@@ -122,7 +125,7 @@
                 var clientSecondName = $(this).data('clientsecondname');
                 var dateFrom = $(this).data('datereservationfrom');
                 var dateTo = $(this).data('datereservationto');
-                var toolID = $(this).data('toolid');
+                var toolID = $(this).data('tool');
                 
                 $('#ReservationID').val(id);
                 $('#ClientFirstName').val(clientFirstName);
@@ -133,13 +136,14 @@
 
                 // popup show
                 $('#toolReservationModal').modal('show');
+                var modalTitle = $('#toolReservationModalLabel');
+                modalTitle.text('Edit tool reservations');
                 loadToolsDropdown(1);  
             });
 
             // Form submit 
             $('#toolReservationForm').on('submit', function (e) {
                 e.preventDefault();
-
                 var formData = $(this).serialize();
                 var formAction = ($('#ReservationID').val() == '') ? '/ToolReservations/Create' : '/ToolReservations/Edit'; 
 
@@ -148,11 +152,11 @@
                     url: formAction,
                     data: formData,
                     success: function (response) {
-                        if (response.success) {
-                            alert(response.message);
+                        if (response == 200) {
+                            alert("Successfully done !");
                             location.reload();  
                         } else {
-                            alert(response.message);
+                            alert("Error !");
                         }
                     },
                     error: function (response) {
@@ -161,13 +165,38 @@
                 });
             });
 
+            $(document).ready(function () {               
+                $('.delete-btn').on('click', function () {
+                    var reservationId = $(this).data('id'); 
+
+                    if (confirm('Are you sure you want to delete ?')) {
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("Delete", "ToolReservations")',
+                            data: { id: reservationId },
+                            success: function (response) {
+                                if (response == 200) {
+                                    alert("Successfully deleted: ");
+                                } else {
+                                    alert("Error deleting record.");
+                                }
+                            },
+                            error: function () {
+                                alert("An error occurred while attempting to delete the record.");
+                            }
+                        });
+                    }
+                });
+            });
+
+
             // pagination
             function loadToolsDropdown(pageNumber) {
                 $.get('/ToolReservations/GetToolsForDropdown', { pageNumber: pageNumber, pageSize: 10 }, function (tools) {
                     var $toolSelect = $('#ToolID');
                     $toolSelect.empty();
                     tools.forEach(function (tool) {
-                        $toolSelect.append(new Option(tool.ToolType, tool.ID));
+                        $toolSelect.append(new Option(tool.toolType, tool.id));
                     });
                 });
             }
